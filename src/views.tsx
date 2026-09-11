@@ -60,13 +60,13 @@ export function Plot({
     );
   const min = Math.min(...values) - 0.5,
     max = Math.max(...values) + 0.5;
-  const x = (i: number) => 45 + (i / Math.max(1, labels.length - 1)) * 685,
+  const x = (i: number) => 45 + (i / Math.max(1, labels.length - 1)) * 325,
     y = (n: number) => 190 - ((n - min) / (max - min)) * 155;
   return (
     <>
       <svg
         className="chart"
-        viewBox="0 0 760 230"
+        viewBox="0 0 400 245"
         role="img"
         aria-label={
           "Trend chart in " + unit + ". Exact readings are in the table below."
@@ -76,22 +76,28 @@ export function Plot({
           <g key={i}>
             <line
               x1="45"
-              x2="730"
+              x2="370"
               y1={35 + (i * 155) / 3}
               y2={35 + (i * 155) / 3}
-              stroke="#e6e8e1"
+              stroke="#344743"
             />
-            <text x="0" y={39 + (i * 155) / 3} fontSize="11" fill="#6d756f">
+            <text x="0" y={39 + (i * 155) / 3} fontSize="15" fill="#b5c8c3">
               {(max - (i * (max - min)) / 3).toFixed(1)}
             </text>
           </g>
         ))}
-        {series.map((s) => (
-          <g key={s.label}>
+        {[...series].reverse().map((s) => (
+          <g key={s.label} data-series={s.label}>
             {s.values.map(
               (v, i) =>
                 v !== null && (
-                  <circle key={i} cx={x(i)} cy={y(v)} r="3" fill={s.color} />
+                  <circle
+                    key={i}
+                    cx={x(i)}
+                    cy={y(v)}
+                    r={s.label === "Morning" ? 5 : 3}
+                    fill={s.color}
+                  />
                 ),
             )}
             <path
@@ -104,7 +110,8 @@ export function Plot({
                 .join(" ")}
               fill="none"
               stroke={s.color}
-              strokeWidth="2.3"
+              strokeWidth={s.label === "Morning" ? "3" : "2.3"}
+              strokeDasharray={s.label === "Morning" ? "9 6" : undefined}
             />
           </g>
         ))}
@@ -115,8 +122,8 @@ export function Plot({
               x={x(i)}
               y="220"
               textAnchor="middle"
-              fontSize="11"
-              fill="#6d756f"
+              fontSize="15"
+              fill="#b5c8c3"
             >
               {labels[i]?.slice(5)}
             </text>
@@ -254,7 +261,7 @@ export function Trends({
               },
               {
                 label: "7-day trend",
-                color: "#234d3c",
+                color: "#71ddba",
                 values: points.map((x) =>
                   x.avg7 === null ? null : kgToDisplay(x.avg7, p),
                 ),
@@ -277,7 +284,7 @@ export function Trends({
               },
               {
                 label: "Learned offset",
-                color: "#234d3c",
+                color: "#71ddba",
                 values: points.map((x) =>
                   x.offset === null ? null : kgToDisplay(x.offset, p),
                 ),
@@ -291,7 +298,7 @@ export function Trends({
             series={[
               {
                 label: kind === "steps" ? "Steps" : "Estimated TDEE",
-                color: "#234d3c",
+                color: "#71ddba",
                 values: days.map((d) => (kind === "steps" ? d.steps : d.tdee)),
               },
             ]}
@@ -413,53 +420,12 @@ export function Trends({
           </div>
           <div>
             <p>
-              At your typical {Math.round(model.medianSteps).toLocaleString()}{" "}
-              steps, your estimated maintenance expenditure is{" "}
-              <strong>
-                {Math.round(model.baseline).toLocaleString()} kcal/day
-              </strong>
-              .
+              Typical steps: {Math.round(model.medianSteps).toLocaleString()}
             </p>
-            <p>
-              {model.stepKcalPer1000 === null
-                ? "Your step response is still using a conservative starting estimate."
-                : `Your current personal estimate is ${Math.round(model.stepKcalPer1000)} kcal per 1,000 additional steps.`}
-            </p>
-            <p>
-              Formula starting TDEE: {Math.round(model.formulaTdee)} kcal.
-              Recent modeled averages: {Math.round(model.avg7)} kcal (7 days) /{" "}
-              {Math.round(model.avg28)} kcal (28 days).
-            </p>
+            <p>7-day TDEE: {Math.round(model.avg7)} kcal</p>
+            <p>28-day TDEE: {Math.round(model.avg28)} kcal</p>
           </div>
         </div>
-        <details>
-          <summary>How this estimate works</summary>
-          {model.explanations.map((s) => (
-            <p key={s}>{s}</p>
-          ))}
-          <p>
-            Version {model.version} · observation window {model.start} to{" "}
-            {model.end}. The effective tissue-energy model uses a lean/fat
-            partition estimate; it has not been clinically validated.
-          </p>
-          <p>
-            <a
-              href="https://pubmed.ncbi.nlm.nih.gov/2305711/"
-              target="_blank"
-              rel="noreferrer"
-            >
-              Resting equation reference
-            </a>{" "}
-            ·{" "}
-            <a
-              href="https://www.niddk.nih.gov/bwp"
-              target="_blank"
-              rel="noreferrer"
-            >
-              Dynamic weight modeling background
-            </a>
-          </p>
-        </details>
         <details>
           <summary>Daily activity and model inclusion</summary>
           <div className="table-scroll">
@@ -694,15 +660,6 @@ export function NutrientsView({ data, date }: { data: Data; date: string }) {
           </tbody>
         </table>
       </div>
-      <p className="fine-print">
-        Targets are configurable reference intakes, not a diagnosis.
-        Form-specific upper limits for supplemental magnesium, folic acid,
-        niacin, and preformed vitamin A are omitted unless entered manually;
-        total intake alone cannot determine those exposures.{" "}
-        <a href={referenceUrl} target="_blank" rel="noreferrer">
-          Reference tables
-        </a>
-      </p>
       {selected && (
         <Modal
           title={
@@ -903,7 +860,7 @@ export function SettingsView({
             <summary>Goal history</summary>
             {data.goals.map((g) => (
               <p key={g.id}>
-                {g.effective} · {g.calories} kcal · {g.waterMl} ml water
+                {g.effective} · {g.calories} kcal
               </p>
             ))}
           </details>
@@ -1098,33 +1055,35 @@ export function SettingsView({
         </button>
         <details>
           <summary>Manage recorded observations</summary>
-          {data.observations.map((o) => (
-            <div className="food-result" key={o.id}>
-              <span>
-                {o.date} · {o.kind}
-                <small>
-                  {Object.entries(o.values)
-                    .map(([k, v]) => `${k}: ${v}`)
-                    .join(" · ")}
-                </small>
-              </span>
-              <button
-                className="icon-button"
-                aria-label={"Delete " + o.kind + " " + o.date}
-                onClick={async () => {
-                  await save({
-                    ...data,
-                    observations: data.observations.filter(
-                      (x) => x.id !== o.id,
-                    ),
-                  });
-                  notify("Observation removed.");
-                }}
-              >
-                <Trash2 size={15} />
-              </button>
-            </div>
-          ))}
+          {data.observations
+            .filter((o) => o.kind !== "water")
+            .map((o) => (
+              <div className="food-result" key={o.id}>
+                <span>
+                  {o.date} · {o.kind}
+                  <small>
+                    {Object.entries(o.values)
+                      .map(([k, v]) => `${k}: ${v}`)
+                      .join(" · ")}
+                  </small>
+                </span>
+                <button
+                  className="icon-button"
+                  aria-label={"Delete " + o.kind + " " + o.date}
+                  onClick={async () => {
+                    await save({
+                      ...data,
+                      observations: data.observations.filter(
+                        (x) => x.id !== o.id,
+                      ),
+                    });
+                    notify("Observation removed.");
+                  }}
+                >
+                  <Trash2 size={15} />
+                </button>
+              </div>
+            ))}
         </details>
         <p className="fine-print">
           Food data:{" "}
@@ -1139,8 +1098,6 @@ export function SettingsView({
           >
             Open Food Facts (ODbL)
           </a>
-          . Local edits are your own; provider attribution is preserved in
-          exports and backups.
         </p>
       </section>
       <ErrorText error={error} />
@@ -1214,13 +1171,6 @@ function GoalEditor({
           min={1}
           required
         />
-        <NumberField
-          label="Drinking water (ml/day)"
-          value={g.waterMl}
-          onChange={(v) => setG({ ...g, waterMl: Number(v) })}
-          min={1}
-          required
-        />
       </div>
       {g.calories < 1200 && (
         <p className="warning">
@@ -1238,10 +1188,6 @@ function GoalEditor({
       >
         Regenerate reference targets from profile
       </button>
-      <p className="fine-print">
-        Targets are daily planning references. Form-specific upper limits are
-        not applied to total nutrient intake.
-      </p>
       {["Macros", "Fats", "Minerals", "Vitamins", "Other", "Amino acids"].map(
         (group) => (
           <details key={group} open={group === "Macros"}>

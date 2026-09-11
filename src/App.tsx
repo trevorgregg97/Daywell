@@ -146,10 +146,7 @@ export default function App() {
     entries = data.entries.filter((e) => e.date === date),
     check = data.checks.find((c) => c.date === date),
     model = p ? energyModel(data, date) : null;
-  const calories = total(entries, "calories"),
-    water = data.observations
-      .filter((o) => o.date === date && o.kind === "water")
-      .reduce((s, o) => s + Number(o.values.ml), 0);
+  const calories = total(entries, "calories");
   const completed = check?.complete;
   const amDue =
     p &&
@@ -536,64 +533,7 @@ export default function App() {
                     Open food diary <ArrowUpRight size={15} />
                   </button>
                 </div>
-                <div className="right-stack">
-                  <div className="card hydration-card">
-                    <div className="card-heading">
-                      <h2>
-                        <Droplets size={18} /> Stay hydrated
-                      </h2>
-                      <span>
-                        {Math.round((water / 1000) * 10) / 10} /{" "}
-                        {(g?.waterMl || 2000) / 1000} L
-                      </span>
-                    </div>
-                    <div className="water-drops">
-                      {Array.from({ length: 8 }, (_, i) => (
-                        <Droplets
-                          key={i}
-                          size={27}
-                          fill={
-                            (water / (g?.waterMl || 2000)) * 8 > i
-                              ? "#6b9bb1"
-                              : "none"
-                          }
-                          color={
-                            (water / (g?.waterMl || 2000)) * 8 > i
-                              ? "#6b9bb1"
-                              : "#d5e1e4"
-                          }
-                        />
-                      ))}
-                    </div>
-                    <button
-                      className="secondary full"
-                      onClick={() => setModal("water")}
-                    >
-                      <Plus size={15} /> Log water
-                    </button>
-                  </div>
-                  <div className="card insight-card">
-                    <span className="eyebrow">
-                      <Leaf size={15} /> THE LONG VIEW
-                    </span>
-                    <h2>
-                      {model?.ready === "personalized"
-                        ? "Your pattern is taking shape."
-                        : "Progress is a pattern."}
-                    </h2>
-                    <p>
-                      {model
-                        ? `${model.validDays} complete days recorded. ${model.ready === "provisional" ? "Keep checking in to begin learning your energy needs." : "Your intake, weight trend, and steps are informing your expenditure estimate."}`
-                        : "Your first check-in starts a clearer picture of you."}
-                    </p>
-                    <button
-                      className="text-button"
-                      onClick={() => setTab("trends")}
-                    >
-                      Explore your trends <ArrowUpRight size={15} />
-                    </button>
-                  </div>
-                </div>
+                <div className="right-stack"></div>
               </section>
               <section className="quick-stats">
                 <div>
@@ -708,15 +648,12 @@ export default function App() {
           />
         </Modal>
       )}
-      {p && ["water", "wellness"].includes(modal) && (
-        <Modal
-          title={modal === "water" ? "Log your water" : "A moment for you"}
-          onClose={close}
-        >
+      {p && modal === "wellness" && (
+        <Modal title="Wellness" onClose={close}>
           <ObservationForm
             data={data}
             date={date}
-            initial={modal === "water" ? "water" : "wellness"}
+            initial="wellness"
             save={save}
             onDone={() => {
               close();

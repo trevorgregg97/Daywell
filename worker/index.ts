@@ -1,4 +1,5 @@
 import { fromUSDA, fromOFF } from "./providers";
+import { searchPersonalFoods } from "./personal-foods";
 type Limit = {
   limit: (options: { key: string }) => Promise<{ success: boolean }>;
 };
@@ -76,6 +77,14 @@ export async function handle(request: Request, env: Env) {
       page > 100)
   )
     return json({ error: "Enter 2–120 characters and a valid page." }, 400);
+  // Personal searches are authenticated above, but do not require upstream keys,
+  // quotas or caches. They never masquerade as USDA/OFF records. Matching queries
+  // use a dedicated result set; unrelated searches retain the provider workflow.
+  if (search) {
+    const personal = searchPersonalFoods(q);
+    if (personal.length)
+      return json({ foods: page === 1 ? personal : [], cursor: null });
+  }
   if (provider === "usda" && !env.USDA_API_KEY)
     return json(
       {

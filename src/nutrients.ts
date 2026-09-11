@@ -195,7 +195,6 @@ export const nutrients: Nutrient[] = [
   row("folate", "Folate (DFE)", "µg", "Vitamins", 1190, undefined, 400, 400),
   row("b12", "Vitamin B12", "µg", "Vitamins", 1178, "vitamin-b12", 2.4, 2.4),
   row("choline", "Choline", "mg", "Vitamins", 1180, undefined, 550, 425, 3500),
-  row("water", "Food water", "ml", "Other", 1051),
   row("caffeine", "Caffeine", "mg", "Other", 1057, "caffeine"),
   row("alcohol", "Alcohol", "g", "Other", 1018),
   ...[

@@ -39,10 +39,7 @@ test("private diary, check-ins, recipes and offline persistence", async ({
   await expect(
     page.getByRole("button", { name: /Evening check-in/ }),
   ).toContainText("8,500 steps");
-  await page.getByRole("button", { name: "Log water", exact: true }).click();
-  await page.getByLabel("Water (ml)", { exact: true }).fill("500");
-  await page.getByRole("button", { name: "Save observation" }).click();
-  await expect(page.locator(".hydration-card")).toContainText("0.5 / 2 L");
+  await expect(page.getByRole("button", { name: "Log water" })).toHaveCount(0);
   await page
     .getByRole("navigation")
     .getByRole("button", { name: "Nutrients", exact: true })

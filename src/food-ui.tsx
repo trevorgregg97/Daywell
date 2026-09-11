@@ -245,16 +245,11 @@ export function FoodPanel({
         </button>
         <h3>{selected.name}</h3>
         <p className="subtle">
-          {selected.brand} · {selected.attribution}
+          {selected.provider === "off"
+            ? "Open Food Facts · ODbL"
+            : selected.brand}
         </p>
-        <small>
-          {selected.edited ? "Locally edited · " : ""}
-          {Object.values(selected.nutrients).filter((v) => v != null).length}/
-          {nutrients.length} nutrients reported{" "}
-          {selected.retrievedAt
-            ? "· Retrieved " + selected.retrievedAt.slice(0, 10)
-            : ""}
-        </small>
+
         <div className="form-grid">
           <NumberField
             label="Quantity"
@@ -1069,10 +1064,7 @@ function RecipeEditor({
           required
         />
       </div>
-      <small>
-        Leave yield blank to use ingredient weight. A final cooked weight
-        accounts for water gain/loss; no nutrient retention factors are assumed.
-      </small>
+
       <ErrorText error={error} />
       <button className="primary full">
         Save {template ? "meal" : "recipe"}

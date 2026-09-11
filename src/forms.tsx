@@ -259,12 +259,6 @@ export function ProfileForm({
             ? "Save profile"
             : "Make yourself at home"}
       </button>
-      {data.profile && (
-        <small>
-          Existing goal periods are preserved. Use Settings to regenerate
-          reference targets.
-        </small>
-      )}
     </form>
   );
 }
@@ -519,35 +513,31 @@ export function ObservationForm({
   onDone: () => void;
 }) {
   const [kind, setKind] = useState(initial),
-    [values, setValues] = useState<Record<string, string | boolean>>(
-      initial === "water" ? { ml: "250" } : {},
-    ),
+    [values, setValues] = useState<Record<string, string | boolean>>({}),
     [notes, setNotes] = useState(""),
     [error, setError] = useState("");
   const fields =
-    kind === "water"
-      ? [["ml", "Water (ml)"]]
-      : kind === "exercise"
+    kind === "exercise"
+      ? [
+          ["type", "Activity"],
+          ["minutes", "Duration (minutes)"],
+          ["calories", "Estimated active calories"],
+        ]
+      : kind === "body"
         ? [
-            ["type", "Activity"],
-            ["minutes", "Duration (minutes)"],
-            ["calories", "Estimated active calories"],
+            ["bodyFat", "Body fat (%)"],
+            ["waist", "Waist (cm)"],
+            ["hip", "Hip (cm)"],
+            ["chest", "Chest (cm)"],
+            ["neck", "Neck (cm)"],
           ]
-        : kind === "body"
-          ? [
-              ["bodyFat", "Body fat (%)"],
-              ["waist", "Waist (cm)"],
-              ["hip", "Hip (cm)"],
-              ["chest", "Chest (cm)"],
-              ["neck", "Neck (cm)"],
-            ]
-          : [
-              ["sleep", "Sleep (hours)"],
-              ["hunger", "Hunger (1–5)"],
-              ["energy", "Energy (1–5)"],
-              ["mood", "Mood (1–5)"],
-              ["digestion", "Digestion (1–5)"],
-            ];
+        : [
+            ["sleep", "Sleep (hours)"],
+            ["hunger", "Hunger (1–5)"],
+            ["energy", "Energy (1–5)"],
+            ["mood", "Mood (1–5)"],
+            ["digestion", "Digestion (1–5)"],
+          ];
   return (
     <form
       onSubmit={async (e) => {
@@ -586,7 +576,6 @@ export function ObservationForm({
             setValues({});
           }}
         >
-          <option value="water">Hydration</option>
           <option value="exercise">Exercise</option>
           <option value="wellness">Wellness</option>
           <option value="body">Body measurements</option>

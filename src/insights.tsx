@@ -78,10 +78,7 @@ function correlation(pairs: number[][]) {
 }
 export function NutritionTrends({ data, date }: { data: Data; date: string }) {
   const [metric, setMetric] = useState("calories"),
-    [window, setWindow] = useState(28),
-    [insights, setInsights] = useState(
-      localStorage.getItem("daywell-insights") !== "hidden",
-    );
+    [window, setWindow] = useState(28);
   const days = Array.from({ length: window }, (_, i) =>
     shiftDay(date, 1 - window + i),
   );
@@ -96,12 +93,6 @@ export function NutritionTrends({ data, date }: { data: Data; date: string }) {
         .map((o) => Number(o.values[key]));
       return values.length ? mean(values) : null;
     };
-    if (metric === "water") {
-      const water = obs.filter((o) => o.kind === "water");
-      return water.length
-        ? water.reduce((s, o) => s + Number(o.values.ml), 0)
-        : null;
-    }
     if (metric === "adherence") {
       const energy = total(entries, "calories");
       return c?.complete &&
@@ -186,7 +177,6 @@ export function NutritionTrends({ data, date }: { data: Data; date: string }) {
                 </option>
               ))}
             {[
-              ["water", "Drinking water"],
               ["adherence", "Calorie target adherence"],
               ["sleep", "Sleep"],
               ["hunger", "Hunger"],
@@ -222,13 +212,9 @@ export function NutritionTrends({ data, date }: { data: Data; date: string }) {
         unit={unit}
         series={[
           { label: "Daily observation", color: "#9b92b3", values: series },
-          { label: "7-day average", color: "#234d3c", values: rolling },
+          { label: "7-day average", color: "#71ddba", values: rolling },
         ]}
       />
-      <p className="fine-print">
-        Averages use observed days only. Unknown values and unlogged days remain
-        gaps; partial food totals may underestimate intake.
-      </p>
       <details>
         <summary>Exact daily observations</summary>
         <div className="table-scroll">
@@ -252,31 +238,6 @@ export function NutritionTrends({ data, date }: { data: Data; date: string }) {
           </table>
         </div>
       </details>
-      <Toggle
-        label="Show descriptive insights"
-        checked={insights}
-        onChange={(v) => {
-          setInsights(v);
-          localStorage.setItem("daywell-insights", v ? "shown" : "hidden");
-        }}
-      />
-      {insights && (
-        <div className="insight-note">
-          <p>
-            {complete.length} of {window} days have a confirmed complete diary.
-          </p>
-          <p>
-            {r === null
-              ? `Steps and energy ratings need at least seven paired days with variation to show a relationship (${pairs.length} available).`
-              : `Steps and energy rating correlation: ${r.toFixed(2)} across ${pairs.length} paired days. This describes an association, not a causal effect.`}
-          </p>
-          <p>
-            {data.profile!.goal === "maintain"
-              ? "A steady weight trend over several weeks is more informative than any single reading."
-              : "Use your rolling weight trend to assess your goal rate; short-term water changes can hide progress."}
-          </p>
-        </div>
-      )}
     </section>
   );
 }
